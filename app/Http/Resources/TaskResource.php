@@ -19,8 +19,7 @@ class TaskResource extends JsonResource
             'name' => $this->resource->name,
             'description' => $this->resource->description,
             'is_completed' => $this->resource->is_completed,
-            //            'completed_at' => $this->resource->completed_at,
-            'created_at' => $this->resource->created_at,
+            'created_at' => $this->resource->created_at->toDateTimeString(),
         ];
     }
 }

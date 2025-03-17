@@ -13,7 +13,7 @@ class IndexAction
     public function run(IndexData $data): LengthAwarePaginator
     {
         return Task::query()
-            ->latest()
+            ->latest('id')
             ->when(! $data->filters->includeCompleted, fn ($query) => $query->whereNull('completed_at'))
             ->paginate(null, ['*'], 'page', $data->page);
     }
