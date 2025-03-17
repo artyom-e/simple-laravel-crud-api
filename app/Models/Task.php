@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\TaskFactory;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -16,7 +19,9 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ * @property bool $is_completed
  *
+ * @method static TaskFactory factory($count = null, $state = [])
  * @method static Builder<static>|Task newModelQuery()
  * @method static Builder<static>|Task newQuery()
  * @method static Builder<static>|Task onlyTrashed()
@@ -35,14 +40,32 @@ use Illuminate\Support\Carbon;
  */
 class Task extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
         'description',
+        'completed_at',
+        'is_completed',
     ];
 
     protected $casts = [
         'completed_at' => 'datetime',
     ];
+
+    protected function isCompleted(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => $attributes['completed_at'] !== null,
+            set: function (bool $value, array $attributes) {
+                if ($value && $attributes['completed_at'] === null) {
+                    return ['completed_at' => now()];
+                } elseif (! $value) {
+                    return ['completed_at' => null];
+                }
+
+                return [];
+            },
+        );
+    }
 }
