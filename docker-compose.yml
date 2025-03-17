@@ -1,0 +1,24 @@
+services:
+  php:
+    build: ./docker/php
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    ports:
+      - 8000:8000
+    command: ["php", "artisan", "serve", "--host", "0.0.0.0"]
+
+  composer:
+    image: composer:latest
+    volumes:
+      - ./:/app
+
+  db:
+      image: postgres:latest
+      volumes:
+          - ./docker/db/data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_USER: ${DB_USERNAME}
+        POSTGRES_DB: ${DB_DATABASE}
+
