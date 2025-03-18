@@ -13,9 +13,6 @@ use Illuminate\Foundation\Testing\WithFaker;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
-/**
- * @small
- */
 class TaskControllerTest extends TestCase
 {
     use RefreshDatabase;

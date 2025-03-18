@@ -8,9 +8,6 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * @small
- */
 class TaskTest extends TestCase
 {
     use RefreshDatabase;
