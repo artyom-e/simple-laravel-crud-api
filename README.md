@@ -1,6 +1,6 @@
-# Task List CRUD API
+# Simple TODO List CRUD API
 
-A simple task list API built with Laravel, providing basic CRUD (Create, Read, Update, Delete) functionality. This project does not include user authentication or role-based access.
+A simple TODO list API built with Laravel, providing basic CRUD (Create, Read, Update, Delete) functionality. This project does not include user authentication or role-based access.
 
 ## Features
 
