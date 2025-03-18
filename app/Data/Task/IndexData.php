@@ -10,6 +10,7 @@ class IndexData extends Data
 {
     public function __construct(
         public int $page = 1,
-        public IndexFilterData $filters = new IndexFilterData,
-    ) {}
+        public IndexFilterData $filters = new IndexFilterData(),
+    ) {
+    }
 }

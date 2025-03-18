@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Database\Factories\TaskFactory;
@@ -40,7 +42,8 @@ use Illuminate\Support\Carbon;
  */
 class Task extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -56,11 +59,12 @@ class Task extends Model
     protected function isCompleted(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => ($attributes['completed_at'] ?? null) !== null,
+            get: fn(mixed $value, array $attributes) => ($attributes['completed_at'] ?? null) !== null,
             set: function (bool $value, array $attributes) {
                 if ($value && $attributes['completed_at'] === null) {
                     return ['completed_at' => now()];
-                } elseif (! $value) {
+                }
+                if (!$value) {
                     return ['completed_at' => null];
                 }
 

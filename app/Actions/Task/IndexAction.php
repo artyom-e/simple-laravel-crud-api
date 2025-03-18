@@ -14,7 +14,7 @@ class IndexAction
     {
         return Task::query()
             ->latest('id')
-            ->when(! $data->filters->includeCompleted, fn ($query) => $query->whereNull('completed_at'))
+            ->when(!$data->filters->includeCompleted, fn($query) => $query->whereNull('completed_at'))
             ->paginate(null, ['*'], 'page', $data->page);
     }
 }

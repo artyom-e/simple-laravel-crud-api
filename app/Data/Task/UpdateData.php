@@ -16,5 +16,6 @@ class UpdateData extends Data
         #[MapInputName('is_completed')]
         #[MapOutputName('is_completed')]
         public bool $isCompleted = false,
-    ) {}
+    ) {
+    }
 }

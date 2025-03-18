@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Task;
@@ -26,14 +28,14 @@ class TaskFactory extends Factory
 
     public function completed(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'completed_at' => $this->faker->dateTimeBetween('-1 week'),
         ]);
     }
 
     public function incompleted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'completed_at' => null,
         ]);
     }

@@ -1,6 +1,8 @@
 <?php
 
-namespace Tests\Feature;
+declare(strict_types=1);
+
+namespace Tests\Feature\Http\Controllers;
 
 use App\Http\Controllers\TaskController;
 use App\Http\Resources\TaskResource;
@@ -11,11 +13,15 @@ use Illuminate\Foundation\Testing\WithFaker;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
+/**
+ * @small
+ */
 class TaskControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase;
+    use WithFaker;
 
-    public function test_index_empty(): void
+    public function testIndexEmpty(): void
     {
         $this->getJson(action([TaskController::class, 'index']))
             ->assertOk()
@@ -25,7 +31,7 @@ class TaskControllerTest extends TestCase
             ]);
     }
 
-    public function test_index_without_completed(): void
+    public function testIndexWithoutCompleted(): void
     {
         $tasks = Task::factory()->count(5)->incompleted()->create()->sortByDesc('id');
         Task::factory()->count(2)->completed()->create();
@@ -37,7 +43,7 @@ class TaskControllerTest extends TestCase
             ]);
     }
 
-    public function test_index_with_completed(): void
+    public function testIndexWithCompleted(): void
     {
         $task1 = Task::factory()->incompleted()->create();
         $task2 = Task::factory()->completed()->create();
@@ -49,13 +55,13 @@ class TaskControllerTest extends TestCase
             ]);
     }
 
-    public function test_show_not_found(): void
+    public function testShowNotFound(): void
     {
         $this->getJson(action([TaskController::class, 'show'], ['task' => $this->faker->numberBetween(1, 100)]))
             ->assertNotFound();
     }
 
-    public function test_show(): void
+    public function testShow(): void
     {
         $task = Task::factory()->create();
         $this->getJson(action([TaskController::class, 'show'], ['task' => $task]))
@@ -65,13 +71,13 @@ class TaskControllerTest extends TestCase
             ]);
     }
 
-    public function test_destroy_not_found(): void
+    public function testDestroyNotFound(): void
     {
         $this->deleteJson(action([TaskController::class, 'destroy'], ['task' => $this->faker->numberBetween(1, 100)]))
             ->assertNotFound();
     }
 
-    public function test_destroy(): void
+    public function testDestroy(): void
     {
         $task = Task::factory()->create();
         $this->deleteJson(action([TaskController::class, 'destroy'], ['task' => $task]))
@@ -79,13 +85,13 @@ class TaskControllerTest extends TestCase
     }
 
     #[DataProvider('storeValidationErrorsProvider')]
-    public function test_store_with_validation_errors(callable $payloadGenerator, array $validationErrors): void
+    public function testStoreWithValidationErrors(callable $payloadGenerator, array $validationErrors): void
     {
         $this->postJson(action([TaskController::class, 'store']), $payloadGenerator($this->faker))
             ->assertJsonValidationErrors($validationErrors);
     }
 
-    public function test_store(): void
+    public function testStore(): void
     {
         $name = $this->faker->sentence(3);
         $description = $this->faker->optional()->paragraph();
@@ -96,14 +102,14 @@ class TaskControllerTest extends TestCase
     }
 
     #[DataProvider('updateValidationErrorsProvider')]
-    public function test_update_with_validation_errors(callable $payloadGenerator, array $validationErrors): void
+    public function testUpdateWithValidationErrors(callable $payloadGenerator, array $validationErrors): void
     {
         $task = Task::factory()->create();
         $this->putJson(action([TaskController::class, 'update'], ['task' => $task]), $payloadGenerator($this->faker))
             ->assertJsonValidationErrors($validationErrors);
     }
 
-    public function test_update(): void
+    public function testUpdate(): void
     {
         $task = Task::factory()->incompleted()->create();
         $name = $this->faker->sentence(3);
@@ -111,30 +117,30 @@ class TaskControllerTest extends TestCase
         $response = $this->putJson(action([TaskController::class, 'update'], ['task' => $task]), [
             'name' => $name,
             'description' => $description,
-            'is_completed' => ! $task->is_completed,
+            'is_completed' => !$task->is_completed,
         ])->assertOk()
             ->json('data');
         $this->assertEquals($task->id, $response['id']);
         $this->assertEquals($name, $response['name']);
         $this->assertEquals($description, $response['description']);
-        $this->assertEquals(! $task->is_completed, $response['is_completed']);
+        $this->assertEquals(!$task->is_completed, $response['is_completed']);
     }
 
     public static function storeValidationErrorsProvider(): array
     {
         return [
             'name field is required' => [
-                fn (Generator $faker) => [], // payload
+                fn(Generator $faker) => [], // payload
                 ['name'], // validation errors
             ],
             'name must be less than or equal to 255' => [
-                fn (Generator $faker) => [
+                fn(Generator $faker) => [
                     'name' => $faker->realTextBetween(256, 300),
                 ], // payload
                 ['name'], // validation errors
             ],
             'description must be less than or equal to 2048' => [
-                fn (Generator $faker) => [
+                fn(Generator $faker) => [
                     'description' => $faker->realTextBetween(2049, 4098),
                 ], // payload
                 ['description'], // validation errors
@@ -146,23 +152,23 @@ class TaskControllerTest extends TestCase
     {
         return [
             'name and is_completed fields are required' => [
-                fn (Generator $faker) => [], // payload
+                fn(Generator $faker) => [], // payload
                 ['name', 'is_completed'], // validation errors
             ],
             'name must be less than or equal to 255' => [
-                fn (Generator $faker) => [
+                fn(Generator $faker) => [
                     'name' => $faker->realTextBetween(256, 300),
                 ], // payload
                 ['name'], // validation errors
             ],
             'description must be less than or equal to 2048' => [
-                fn (Generator $faker) => [
+                fn(Generator $faker) => [
                     'description' => $faker->realTextBetween(2049, 4098),
                 ], // payload
                 ['description'], // validation errors
             ],
             'is_completed must be a boolean' => [
-                fn (Generator $faker) => [
+                fn(Generator $faker) => [
                     'is_completed' => $faker->word(),
                 ], // payload
                 ['is_completed'], // validation errors

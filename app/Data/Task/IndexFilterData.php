@@ -12,5 +12,6 @@ class IndexFilterData extends Data
     public function __construct(
         #[MapInputName('include_completed')]
         public bool $includeCompleted = false,
-    ) {}
+    ) {
+    }
 }
