@@ -56,7 +56,7 @@ class Task extends Model
     protected function isCompleted(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['completed_at'] !== null,
+            get: fn (mixed $value, array $attributes) => ($attributes['completed_at'] ?? null) !== null,
             set: function (bool $value, array $attributes) {
                 if ($value && $attributes['completed_at'] === null) {
                     return ['completed_at' => now()];
