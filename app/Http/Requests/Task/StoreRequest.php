@@ -6,7 +6,30 @@ namespace App\Http\Requests\Task;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'TaskStoreRequest',
+    title: 'Task Store Request',
+    description: 'Task store request structure',
+    required: ['name'],
+    properties: [
+        new OA\Property(
+            property: 'name',
+            type: 'string',
+            maxLength: 255,
+            example: 'Task 1',
+            nullable: false,
+        ),
+        new OA\Property(
+            property: 'description',
+            type: 'string',
+            maxLength: 2048,
+            example: 'Description 1',
+            nullable: true
+        ),
+    ]
+)]
 class StoreRequest extends FormRequest
 {
     /**
