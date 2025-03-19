@@ -11,6 +11,6 @@ class StoreAction
 {
     public function run(StoreData $data): Task
     {
-        return Task::query()->create($data->all());
+        return $data->list->tasks()->create($data->all());
     }
 }

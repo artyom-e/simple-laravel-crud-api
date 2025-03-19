@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -22,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property bool $is_completed
- *
  * @method static TaskFactory factory($count = null, $state = [])
  * @method static Builder<static>|Task newModelQuery()
  * @method static Builder<static>|Task newQuery()
@@ -37,7 +37,9 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Task whereUpdatedAt($value)
  * @method static Builder<static>|Task withTrashed()
  * @method static Builder<static>|Task withoutTrashed()
- *
+ * @property-read TaskList|null $taskList
+ * @property int $task_list_id
+ * @method static Builder<static>|Task whereTaskListId($value)
  * @mixin Eloquent
  */
 class Task extends Model
@@ -71,5 +73,10 @@ class Task extends Model
                 return [];
             },
         );
+    }
+
+    public function taskList(): BelongsTo
+    {
+        return $this->belongsTo(TaskList::class);
     }
 }

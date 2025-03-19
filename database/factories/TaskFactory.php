@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Task;
+use App\Models\TaskList;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,8 +21,9 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         return [
+            'task_list_id' => TaskList::factory(),
             'name' => $this->faker->sentence(),
-            'description' => $this->faker->paragraph(),
+            'description' => $this->faker->optional()->paragraph(),
             'completed_at' => $this->faker->optional()->dateTimeBetween('-1 week'),
         ];
     }

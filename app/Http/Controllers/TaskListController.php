@@ -4,41 +4,30 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Task\DestroyAction;
-use App\Actions\Task\IndexAction;
-use App\Actions\Task\StoreAction;
-use App\Actions\Task\UpdateAction;
-use App\Data\Task\IndexData;
-use App\Data\Task\StoreData;
-use App\Data\Task\UpdateData;
-use App\Http\Requests\Task\IndexRequest;
-use App\Http\Requests\Task\StoreRequest;
-use App\Http\Requests\Task\UpdateRequest;
-use App\Http\Resources\TaskResource;
-use App\Models\Task;
+use App\Actions\TaskList\DestroyAction;
+use App\Actions\TaskList\IndexAction;
+use App\Actions\TaskList\StoreAction;
+use App\Actions\TaskList\UpdateAction;
+use App\Data\TaskList\IndexData;
+use App\Data\TaskList\StoreData;
+use App\Data\TaskList\UpdateData;
+use App\Http\Requests\TaskList\IndexRequest;
+use App\Http\Requests\TaskList\StoreRequest;
+use App\Http\Requests\TaskList\UpdateRequest;
+use App\Http\Resources\TaskListResource;
 use App\Models\TaskList;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use OpenApi\Attributes as OA;
 
-class TaskController extends Controller
+class TaskListController extends Controller
 {
     #[OA\Get(
-        path: '/api/lists/{list}/tasks',
-        description: 'Get task list',
-        tags: ['Tasks'],
+        path: '/api/lists',
+        description: 'Get lists',
+        tags: ['Lists'],
         parameters: [
-            new OA\Parameter(
-                name: 'list',
-                description: 'List id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(
-                    type: 'number',
-                    example: 1
-                )
-            ),
             new OA\Parameter(
                 name: 'page',
                 description: 'Page number',
@@ -47,16 +36,6 @@ class TaskController extends Controller
                 schema: new OA\Schema(
                     type: 'number',
                     example: 1
-                )
-            ),
-            new OA\Parameter(
-                name: 'filters[include_completed]',
-                description: 'Filter by task completion status',
-                in: 'query',
-                required: false,
-                schema: new OA\Schema(
-                    type: 'boolean',
-                    example: true
                 )
             ),
         ],
@@ -68,9 +47,9 @@ class TaskController extends Controller
                     properties: [
                         new OA\Property(
                             property: 'data',
-                            description: "Task resource",
+                            description: "List resource",
                             type: 'array',
-                            items: new OA\Items(ref: '#/components/schemas/TaskResource')
+                            items: new OA\Items(ref: '#/components/schemas/TaskListResource')
                         ),
                         new OA\Property(
                             property: 'meta',
@@ -88,37 +67,25 @@ class TaskController extends Controller
             )
         ]
     )]
-    public function index(IndexRequest $request, TaskList $list, IndexData $data, IndexAction $indexAction): AnonymousResourceCollection
+    public function index(IndexRequest $request, IndexData $data, IndexAction $indexAction): AnonymousResourceCollection
     {
-        $tasks = $indexAction->run($data);
+        $lists = $indexAction->run($data);
 
-        return TaskResource::collection($tasks);
+        return TaskListResource::collection($lists);
     }
 
     #[OA\Post(
-        path: '/api/lists/{list}/tasks',
-        description: 'Create Task',
+        path: '/api/lists',
+        description: 'Create List',
         requestBody: new OA\RequestBody(
             content: new OA\MediaType(
                 mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
-                    ref: '#/components/schemas/TaskStoreRequest'
+                    ref: '#/components/schemas/TaskListStoreRequest'
                 )
             ),
         ),
-        tags: ['Tasks'],
-        parameters: [
-            new OA\Parameter(
-                name: 'list',
-                description: 'List id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(
-                    type: 'number',
-                    example: 1
-                )
-            ),
-        ],
+        tags: ['Lists'],
         responses: [
             new OA\Response(
                 response: 201,
@@ -127,8 +94,8 @@ class TaskController extends Controller
                     properties: [
                         new OA\Property(
                             property: 'data',
-                            ref: '#/components/schemas/TaskResource',
-                            description: "Task resource",
+                            ref: '#/components/schemas/TaskListResource',
+                            description: "List resource",
                             type: 'object'
                         )
                     ]
@@ -141,31 +108,21 @@ class TaskController extends Controller
             )
         ]
     )]
-    public function store(StoreRequest $request, TaskList $list, StoreData $data, StoreAction $storeAction): TaskResource
+    public function store(StoreRequest $request, StoreData $data, StoreAction $storeAction): TaskListResource
     {
-        $task = $storeAction->run($data);
+        $list = $storeAction->run($data);
 
-        return new TaskResource($task);
+        return new TaskListResource($list);
     }
 
     #[OA\Get(
-        path: '/api/lists/{list}/tasks/{task}',
-        description: 'Get task by id',
-        tags: ['Tasks'],
+        path: '/api/lists/{list}',
+        description: 'Get list by id',
+        tags: ['Lists'],
         parameters: [
             new OA\Parameter(
                 name: 'list',
                 description: 'List id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(
-                    type: 'number',
-                    example: 1
-                )
-            ),
-            new OA\Parameter(
-                name: 'task',
-                description: 'Task id',
                 in: 'path',
                 required: true,
                 schema: new OA\Schema(
@@ -182,8 +139,8 @@ class TaskController extends Controller
                     properties: [
                         new OA\Property(
                             property: 'data',
-                            ref: '#/components/schemas/TaskResource',
-                            description: "Task resource",
+                            ref: '#/components/schemas/TaskListResource',
+                            description: "List resource",
                             type: 'object'
                         )
                     ]
@@ -191,7 +148,7 @@ class TaskController extends Controller
             ),
             new OA\Response(
                 response: 404,
-                description: 'Task not found',
+                description: 'List not found',
                 content: new OA\JsonContent(ref: '#/components/schemas/Http404')
             ),
             new OA\Response(
@@ -201,37 +158,27 @@ class TaskController extends Controller
             )
         ]
     )]
-    public function show(TaskList $list, Task $task): TaskResource
+    public function show(TaskList $list): TaskListResource
     {
-        return new TaskResource($task);
+        return new TaskListResource($list);
     }
 
     #[OA\Put(
-        path: '/api/lists/{list}/tasks/{task}',
-        description: 'Update Task by id',
+        path: '/api/lists/{list}',
+        description: 'Update List by id',
         requestBody: new OA\RequestBody(
             content: new OA\MediaType(
                 mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
-                    ref: '#/components/schemas/TaskUpdateRequest'
+                    ref: '#/components/schemas/TaskListUpdateRequest'
                 )
             ),
         ),
-        tags: ['Tasks'],
+        tags: ['Lists'],
         parameters: [
             new OA\Parameter(
                 name: 'list',
                 description: 'List id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(
-                    type: 'number',
-                    example: 1
-                )
-            ),
-            new OA\Parameter(
-                name: 'task',
-                description: 'Task id',
                 in: 'path',
                 required: true,
                 schema: new OA\Schema(
@@ -248,8 +195,8 @@ class TaskController extends Controller
                     properties: [
                         new OA\Property(
                             property: 'data',
-                            ref: '#/components/schemas/TaskResource',
-                            description: "Task resource",
+                            ref: '#/components/schemas/TaskListResource',
+                            description: "List resource",
                             type: 'object'
                         )
                     ]
@@ -262,31 +209,21 @@ class TaskController extends Controller
             )
         ]
     )]
-    public function update(UpdateRequest $request, TaskList $list, Task $task, UpdateData $data, UpdateAction $updateAction): TaskResource
+    public function update(UpdateRequest $request, UpdateData $data, UpdateAction $updateAction, TaskList $list): TaskListResource
     {
-        $task = $updateAction->run($task, $data);
+        $list = $updateAction->run($list, $data);
 
-        return new TaskResource($task);
+        return new TaskListResource($list);
     }
 
     #[OA\Delete(
-        path: '/api/lists/{list}/tasks/{task}',
-        description: 'Delete task by id',
-        tags: ['Tasks'],
+        path: '/api/lists/{list}',
+        description: 'Delete list by id',
+        tags: ['Lists'],
         parameters: [
             new OA\Parameter(
                 name: 'list',
                 description: 'List id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(
-                    type: 'number',
-                    example: 1
-                )
-            ),
-            new OA\Parameter(
-                name: 'task',
-                description: 'Task id',
                 in: 'path',
                 required: true,
                 schema: new OA\Schema(
@@ -302,14 +239,14 @@ class TaskController extends Controller
             ),
             new OA\Response(
                 response: 404,
-                description: 'Task not found',
+                description: 'List not found',
                 content: new OA\JsonContent(ref: '#/components/schemas/Http404')
             )
         ]
     )]
-    public function destroy(TaskList $list, Task $task, DestroyAction $destroyAction): JsonResponse
+    public function destroy(TaskList $list, DestroyAction $destroyAction): JsonResponse
     {
-        $destroyAction->run($task);
+        $destroyAction->run($list);
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }

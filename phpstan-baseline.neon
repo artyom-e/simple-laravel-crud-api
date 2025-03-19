@@ -1,0 +1,7 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Actions\\Task\\StoreAction\:\:run\(\) should return App\\Models\\Task but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Actions/Task/StoreAction.php
