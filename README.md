@@ -34,7 +34,7 @@ The following API routes are available:
 | PUT    | `/api/lists/{id}`            | Update a list       |
 | DELETE | `/api/lists/{id}`            | Delete a list       |
 | ------ | -------------------          | ------------------- |
-| GET    | `/api/lists/{id}/tasks`      | Get a task          |
+| GET    | `/api/lists/{id}/tasks`      | Get tasks           |
 | POST   | `/api/lists/{id}/tasks`      | Create a task       |
 | GET    | `/api/lists/{id}/tasks/{id}` | Get a single task   |
 | PUT    | `/api/lists/{id}/tasks/{id}` | Update a task       |
