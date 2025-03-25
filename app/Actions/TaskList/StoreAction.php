@@ -11,6 +11,10 @@ class StoreAction
 {
     public function run(StoreData $data): TaskList
     {
-        return TaskList::query()->create($data->all());
+        return $data->user->taskLists()
+            ->create([
+                'name' => $data->name,
+                'description' => $data->description,
+            ]);
     }
 }

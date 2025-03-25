@@ -8,6 +8,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Models\TaskList;
+use App\Models\User;
 use Faker\Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -21,6 +22,7 @@ class TaskControllerTest extends TestCase
 
     public function testIndexForNotExistingList(): void
     {
+        $this->actingAs(User::factory()->create());
         $this->getJson(action([TaskController::class, 'index'], ['list' => $this->faker->numberBetween(1, 100)]))
             ->assertNotFound();
     }
@@ -28,6 +30,7 @@ class TaskControllerTest extends TestCase
     public function testIndexEmpty(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $this->getJson(action([TaskController::class, 'index'], ['list' => $list]))
             ->assertOk()
             ->assertJsonFragment([
@@ -39,6 +42,7 @@ class TaskControllerTest extends TestCase
     public function testIndexWithoutCompleted(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $tasks = Task::factory()->count(5)->for($list)->incompleted()->create()->sortByDesc('id');
         Task::factory()->count(2)->for($list)->completed()->create();
         Task::factory()->count(3)->completed()->create();
@@ -53,6 +57,7 @@ class TaskControllerTest extends TestCase
     public function testIndexWithCompleted(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $task1 = Task::factory()->for($list)->incompleted()->create();
         $task2 = Task::factory()->for($list)->completed()->create();
         Task::factory()->completed()->create();
@@ -67,13 +72,24 @@ class TaskControllerTest extends TestCase
     public function testShowTaskNotFound(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $this->getJson(action([TaskController::class, 'show'], ['list' => $list, 'task' => $this->faker->numberBetween(1, 100)]))
             ->assertNotFound();
+    }
+
+    public function testShowTaskFromUnauthenticatedList(): void
+    {
+        $list = TaskList::factory()->create();
+        $task = Task::factory()->for($list)->create();
+        $this->actingAs(User::factory()->create());
+        $this->getJson(action([TaskController::class, 'show'], ['list' => $list, 'task' => $task]))
+            ->assertForbidden();
     }
 
     public function testShowWithInvalidList(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $task = Task::factory()->create();
         $this->getJson(action([TaskController::class, 'show'], ['list' => $list, 'task' => $task]))
             ->assertForbidden();
@@ -82,6 +98,7 @@ class TaskControllerTest extends TestCase
     public function testShow(): void
     {
         $task = Task::factory()->create();
+        $this->actingAs($task->taskList->user);
         $this->getJson(action([TaskController::class, 'show'], ['list' => $task->task_list_id, 'task' => $task]))
             ->assertOk()
             ->assertJson([
@@ -92,14 +109,25 @@ class TaskControllerTest extends TestCase
     public function testDestroyNotFound(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $this->deleteJson(action([TaskController::class, 'destroy'], ['list' => $list, 'task' => $this->faker->numberBetween(1, 100)]))
             ->assertNotFound();
     }
 
-    public function testDestroyWithInvalidList(): void
+    public function testDestroyFromInvalidList(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $task = Task::factory()->create();
+        $this->deleteJson(action([TaskController::class, 'destroy'], ['list' => $list, 'task' => $task]))
+            ->assertForbidden();
+    }
+
+    public function testDestroyFromUnauthenticatedList(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $list = TaskList::factory()->create();
+        $task = Task::factory()->for($list)->create();
         $this->deleteJson(action([TaskController::class, 'destroy'], ['list' => $list, 'task' => $task]))
             ->assertForbidden();
     }
@@ -107,6 +135,7 @@ class TaskControllerTest extends TestCase
     public function testDestroy(): void
     {
         $task = Task::factory()->create();
+        $this->actingAs($task->taskList->user);
         $this->deleteJson(action([TaskController::class, 'destroy'], ['list' => $task->task_list_id, 'task' => $task]))
             ->assertNoContent();
     }
@@ -115,12 +144,14 @@ class TaskControllerTest extends TestCase
     public function testStoreWithValidationErrors(callable $payloadGenerator, array $validationErrors): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $this->postJson(action([TaskController::class, 'store'], ['list' => $list]), $payloadGenerator($this->faker))
             ->assertJsonValidationErrors($validationErrors);
     }
 
     public function testStoreWithNotFoundList(): void
     {
+        $this->actingAs(User::factory()->create());
         $name = $this->faker->sentence(3);
         $description = $this->faker->optional()->paragraph();
         $this->postJson(action([TaskController::class, 'store'], ['list' => $this->faker->numberBetween(1, 100)]), [
@@ -129,9 +160,22 @@ class TaskControllerTest extends TestCase
         ])->assertNotFound();
     }
 
+    public function testStoreToUnauthenticatedList(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $list = TaskList::factory()->create();
+        $name = $this->faker->sentence(3);
+        $description = $this->faker->optional()->paragraph();
+        $this->postJson(action([TaskController::class, 'store'], ['list' => $list]), [
+            'name' => $name,
+            'description' => $description,
+        ])->assertForbidden();
+    }
+
     public function testStore(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $name = $this->faker->sentence(3);
         $description = $this->faker->optional()->paragraph();
         $this->postJson(action([TaskController::class, 'store'], ['list' => $list]), [
@@ -144,6 +188,7 @@ class TaskControllerTest extends TestCase
     public function testUpdateWithValidationErrors(callable $payloadGenerator, array $validationErrors): void
     {
         $task = Task::factory()->create();
+        $this->actingAs($task->taskList->user);
         $this->putJson(action([TaskController::class, 'update'], ['list' => $task->task_list_id, 'task' => $task]), $payloadGenerator($this->faker))
             ->assertJsonValidationErrors($validationErrors);
     }
@@ -151,10 +196,25 @@ class TaskControllerTest extends TestCase
     public function testUpdateWithInvalidList(): void
     {
         $list = TaskList::factory()->create();
+        $this->actingAs($list->user);
         $task = Task::factory()->incompleted()->create();
         $name = $this->faker->sentence(3);
         $description = $this->faker->optional()->paragraph();
-        $response = $this->putJson(action([TaskController::class, 'update'], ['list' => $list, 'task' => $task]), [
+        $this->putJson(action([TaskController::class, 'update'], ['list' => $list, 'task' => $task]), [
+            'name' => $name,
+            'description' => $description,
+            'is_completed' => !$task->is_completed,
+        ])->assertForbidden();
+    }
+
+    public function testUpdateWithUnauthenticatedList(): void
+    {
+        $list = TaskList::factory()->create();
+        $this->actingAs(User::factory()->create());
+        $task = Task::factory()->incompleted()->for($list)->create();
+        $name = $this->faker->sentence(3);
+        $description = $this->faker->optional()->paragraph();
+        $this->putJson(action([TaskController::class, 'update'], ['list' => $list, 'task' => $task]), [
             'name' => $name,
             'description' => $description,
             'is_completed' => !$task->is_completed,
@@ -164,6 +224,7 @@ class TaskControllerTest extends TestCase
     public function testUpdate(): void
     {
         $task = Task::factory()->incompleted()->create();
+        $this->actingAs($task->taskList->user);
         $name = $this->faker->sentence(3);
         $description = $this->faker->optional()->paragraph();
         $response = $this->putJson(action([TaskController::class, 'update'], ['list' => $task->task_list_id, 'task' => $task]), [

@@ -5,3 +5,9 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/Actions/Task/StoreAction.php
+
+		-
+			message: '#^Method App\\Actions\\TaskList\\StoreAction\:\:run\(\) should return App\\Models\\TaskList but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Actions/TaskList/StoreAction.php

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\TaskList;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class TaskListFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'name' => $this->faker->sentence(),
             'description' => $this->faker->optional()->paragraph(),
         ];

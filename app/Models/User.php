@@ -7,13 +7,17 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * @property int $id
@@ -43,6 +47,10 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|User whereUpdatedAt($value)
  * @method static Builder<static>|User withTrashed()
  * @method static Builder<static>|User withoutTrashed()
+ * @property-read Collection<int, TaskList> $taskLists
+ * @property-read int|null $task_lists_count
+ * @property-read Collection<int, PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
  * @mixin Eloquent
  */
 class User extends Authenticatable
@@ -51,6 +59,7 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
     use SoftDeletes;
+    use HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -84,5 +93,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function taskLists(): HasMany
+    {
+        return $this->hasMany(TaskList::class);
     }
 }
