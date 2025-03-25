@@ -13,6 +13,9 @@ A simple TODO list API built with Laravel, providing basic CRUD (Create, Read, U
 
 ## Features
 
+- Sign Up
+- Sign In
+- Sign Out
 - Create task lists
 - View all task lists
 - Edit task lists
@@ -27,7 +30,11 @@ A simple TODO list API built with Laravel, providing basic CRUD (Create, Read, U
 The following API routes are available:
 
 | Method | Endpoint                     | Description         |
-| ------ |------------------------------|---------------------|
+|--------|------------------------------|---------------------|
+| POST   | `/api/sign-up`               | Sign Up             |
+| POST   | `/api/sign-in`               | Sign In             |
+| POST   | `/api/sign-out`              | Sign Out            |
+| ------ | -------------------          | ------------------- |
 | GET    | `/api/lists`                 | Get lists           |
 | POST   | `/api/lists`                 | Create a list       |
 | GET    | `/api/lists/{id}`            | Get a single list   |

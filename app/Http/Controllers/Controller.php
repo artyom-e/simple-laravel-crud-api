@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 #[OA\Info(
     version: "1.0.0",
@@ -71,6 +72,25 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
             description: "The line number in the file where the exception was thrown.",
             type: "integer",
             example: 385
+        )
+    ]
+)]
+#[OA\Schema(
+    schema: "Http401",
+    title: "HTTP Not Authorized",
+    description: "Represents the response for a 401 HTTP error indicating that the requested resource was not authorized.",
+    required: ["message"],
+    properties: [
+        new OA\Property(
+            property: "message",
+            description: "A detailed message explaining that no query results were found for the specified model.",
+            type: "string",
+            example: "Unauthorized"
+        ),
+        new OA\Property(
+            property: "exception",
+            type: "string",
+            example: UnauthorizedHttpException::class
         )
     ]
 )]
